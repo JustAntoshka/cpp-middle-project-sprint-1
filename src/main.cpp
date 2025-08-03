@@ -29,7 +29,7 @@ int main(int argc, char *argv[]) {
             cryptoCtx.DecryptFile(inStream, outStream, options.GetPassword());
             std::print("File decoded successfully\n");
             break;
-        }            
+        }
         case COMMAND_TYPE::CHECKSUM: {
             auto inStream = std::ifstream(options.GetInputFile(), std::ios_base::binary);
             auto checksum = cryptoCtx.CalculateChecksum(inStream);

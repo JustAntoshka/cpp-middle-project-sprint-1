@@ -16,15 +16,15 @@ TEST(CryptoGuardCtx, CheckCorrectPassword) {
 
         auto inputChecksum = ctx.CalculateChecksum(chksumStream);
         ctx.EncryptFile(inStream, outStream, password);
-        
+
         std::string encrypted = outStream.str();
         std::istringstream encryptedStream{encrypted};
         std::istringstream encryptedChksumStream{encrypted};
         std::ostringstream decryptedStream;
-        
+
         auto encryptedChecksum = ctx.CalculateChecksum(encryptedChksumStream);
         ctx.DecryptFile(encryptedStream, decryptedStream, password);
-        
+
         std::string decrypted = decryptedStream.str();
         std::istringstream decryptedChksumStream{decrypted};
 
@@ -73,10 +73,10 @@ TEST(CryptoGuardCtx, CheckWrongPassword) {
     };
 
     test("abcdefghijklmnopqrstuvwxyz", "qwerty", "!@#$%^&*");
-    test("abcdefghijklmnopqrstuvwxyz", "",       "!@#$%^&*");
+    test("abcdefghijklmnopqrstuvwxyz", "", "!@#$%^&*");
     test("abcdefghijklmnopqrstuvwxyz", "qwerty", "");
     test("", "qwerty", "!@#$%^&*");
-    test("", "",       "!@#$%^&*");
+    test("", "", "!@#$%^&*");
     test("", "qwerty", "");
 }
 
@@ -116,13 +116,13 @@ TEST(CryptoGuardCtx, CheckSubsequentCalls2) {
 
         std::istringstream inStream1{input1};
         std::ostringstream outStream1;
-        
+
         ctx.EncryptFile(inStream1, outStream1, password1);
         std::string encrypted1 = outStream1.str();
         std::istringstream encryptedStream1{encrypted1};
         std::ostringstream decryptedStream1;
         ctx.DecryptFile(encryptedStream1, decryptedStream1, password1);
-        
+
         std::istringstream inStream2{input2};
         std::ostringstream outStream2;
 
@@ -140,51 +140,103 @@ TEST(CryptoGuardCtx, CheckSubsequentCalls2) {
 }
 
 TEST(CryptoGuardCtx, CheckInStreamErrorEncrypt) {
-    const auto test = [](std::istringstream& inStream, std::ios::iostate state) {
+    const auto test = [](std::istringstream &inStream, std::ios::iostate state) {
         CryptoGuard::CryptoGuardCtx ctx;
         std::ostringstream outStream;
         inStream.setstate(state);
         ASSERT_THROW(ctx.EncryptFile(inStream, outStream, "qwerty"), std::ios_base::failure);
     };
 
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::badbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::badbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::badbit | std::ios::eofbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::eofbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::badbit | std::ios::eofbit); }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::badbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::badbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::badbit | std::ios::eofbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::eofbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::badbit | std::ios::eofbit);
+    }
 }
 TEST(CryptoGuardCtx, CheckInStreamErrorDecrypt) {
-    const auto test = [](std::istringstream& inStream, std::ios::iostate state) {
+    const auto test = [](std::istringstream &inStream, std::ios::iostate state) {
         CryptoGuard::CryptoGuardCtx ctx;
         std::ostringstream outStream;
         inStream.setstate(state);
         ASSERT_THROW(ctx.DecryptFile(inStream, outStream, "qwerty"), std::ios_base::failure);
     };
 
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::badbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::badbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::badbit | std::ios::eofbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::eofbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::badbit | std::ios::eofbit); }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::badbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::badbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::badbit | std::ios::eofbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::eofbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::badbit | std::ios::eofbit);
+    }
 }
 TEST(CryptoGuardCtx, CheckInStreamErrorChecksum) {
-    const auto test = [](std::istringstream& inStream, std::ios::iostate state) {
+    const auto test = [](std::istringstream &inStream, std::ios::iostate state) {
         CryptoGuard::CryptoGuardCtx ctx;
         inStream.setstate(state);
         ASSERT_THROW(ctx.CalculateChecksum(inStream), std::ios_base::failure);
     };
 
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::badbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::badbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::badbit | std::ios::eofbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::eofbit); }
-    { std::istringstream inStream{"42"}; test(inStream, std::ios::failbit | std::ios::badbit | std::ios::eofbit); }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::badbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::badbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::badbit | std::ios::eofbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::eofbit);
+    }
+    {
+        std::istringstream inStream{"42"};
+        test(inStream, std::ios::failbit | std::ios::badbit | std::ios::eofbit);
+    }
 }
-
-
 
 TEST(CryptoGuardCtx, CheckOutStreamErrorEncrypt) {
     const auto test = [](std::ios::iostate state) {
@@ -219,10 +271,8 @@ TEST(CryptoGuardCtx, CheckOutStreamErrorDecrypt) {
     test(std::ios::failbit | std::ios::badbit | std::ios::eofbit);
 }
 
-
-
 TEST(CryptoGuardCtx, CheckChecksum) {
-    const auto test = [](std::string&& input, std::string&& output) {
+    const auto test = [](std::string &&input, std::string &&output) {
         CryptoGuard::CryptoGuardCtx ctx;
         std::istringstream inStream{input};
         EXPECT_EQ(ctx.CalculateChecksum(inStream), output);
@@ -241,9 +291,8 @@ TEST(CryptoGuardCtx, CheckChecksum) {
     test(std::string(1025, '0'), "959fa8ba78fc16f09bb5ecba70627528e437233595c9f858d2697d2512060cee");
 }
 
-
 TEST(CryptoGuardCtx, CheckEncrypDecryptChecksum) {
-    const auto test = [](std::string&& input, std::string&& output) {
+    const auto test = [](std::string &&input, std::string &&output) {
         CryptoGuard::CryptoGuardCtx ctx;
         std::istringstream inStream{input};
         EXPECT_EQ(ctx.CalculateChecksum(inStream), output);

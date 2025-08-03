@@ -2,8 +2,8 @@
 
 #include <array>
 #include <iomanip>
-#include <openssl/evp.h>
 #include <openssl/err.h>
+#include <openssl/evp.h>
 
 namespace CryptoGuard {
 
@@ -24,16 +24,20 @@ private:
     using InBuf = std::array<char, IN_BUF_SIZE>;
     using OutBuf = std::array<char, OUT_BUF_SIZE>;
 
-    constexpr static auto EvpCipherCtxDeleter = [](EVP_CIPHER_CTX *ctx) { if (ctx) EVP_CIPHER_CTX_free(ctx); };
+    constexpr static auto EvpCipherCtxDeleter = [](EVP_CIPHER_CTX *ctx) {
+        if (ctx)
+            EVP_CIPHER_CTX_free(ctx);
+    };
     using EvpCipherCtxPtr = std::unique_ptr<EVP_CIPHER_CTX, decltype(EvpCipherCtxDeleter)>;
 
-    constexpr static auto EvpMdCtxDeleter = [](EVP_MD_CTX *ctx) { if (ctx) EVP_MD_CTX_free(ctx); };
+    constexpr static auto EvpMdCtxDeleter = [](EVP_MD_CTX *ctx) {
+        if (ctx)
+            EVP_MD_CTX_free(ctx);
+    };
     using EvpMdCtxPtr = std::unique_ptr<EVP_MD_CTX, decltype(EvpMdCtxDeleter)>;
 
 private:
-    std::string GetOpensslErrorString() const {
-        return ERR_error_string(ERR_get_error(), nullptr);
-    }
+    std::string GetOpensslErrorString() const { return ERR_error_string(ERR_get_error(), nullptr); }
 
     AesCipherParams CreateChiperParamsFromPassword(std::string_view password) const {
         AesCipherParams params;
@@ -51,20 +55,20 @@ private:
     }
 
     void Crypt(std::istream &inStream, std::ostream &outStream, const AesCipherParams &params) const {
-        if(!inStream) {
+        if (!inStream) {
             throw std::ios_base::failure{"Failed to read from input"};
         }
-        if(!outStream) {
+        if (!outStream) {
             throw std::ios_base::failure{"Failed to write to output"};
         }
-
 
         auto pCtx = EvpCipherCtxPtr{EVP_CIPHER_CTX_new(), EvpCipherCtxDeleter};
         if (!pCtx) {
             throw std::runtime_error{GetOpensslErrorString()};
         }
 
-        if (!EVP_CipherInit_ex2(pCtx.get(), params.cipher, params.key.data(), params.iv.data(), params.encrypt, nullptr)) {
+        if (!EVP_CipherInit_ex2(pCtx.get(), params.cipher, params.key.data(), params.iv.data(), params.encrypt,
+                                nullptr)) {
             throw std::runtime_error{GetOpensslErrorString()};
         }
 
@@ -118,7 +122,7 @@ public:
     }
 
     std::string CalculateChecksum(std::istream &inStream) const {
-        if(!inStream) {
+        if (!inStream) {
             throw std::ios_base::failure{"Failed to read from input"};
         }
 
@@ -166,8 +170,6 @@ public:
         return outStream.str();
     }
 };
-
-
 
 CryptoGuardCtx::CryptoGuardCtx() : pImpl(std::make_unique<CryptoGuardCtx::Impl>()) {}
 CryptoGuardCtx::~CryptoGuardCtx() = default;
